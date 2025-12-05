@@ -1,0 +1,2 @@
+# Ignore tfvars with secrets
+global/secrets.auto.tfvars
