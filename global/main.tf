@@ -16,14 +16,14 @@ resource "aws_secretsmanager_secret" "hr_portal_db" {
   description = "Shared DB credentials for HR-Portal (dev & prod)"
 }
 
-resource "aws_secretsmanager_secret_version" "hr_portal_db" {
-  secret_id = aws_secretsmanager_secret.hr_portal_db.id
+#resource "aws_secretsmanager_secret_version" "hr_portal_db" {
+#  secret_id = aws_secretsmanager_secret.hr_portal_db.id
 
-  secret_string = jsonencode({
-    username = var.db_username
-    password = var.db_password
-  })
-}
+#  secret_string = jsonencode({
+#    username = var.db_username
+#    password = var.db_password
+#  })
+#}
 
 output "hr_portal_db_secret_arn" {
   value       = aws_secretsmanager_secret.hr_portal_db.arn
