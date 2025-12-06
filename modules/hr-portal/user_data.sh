@@ -24,7 +24,7 @@ DB_NAME="${db_name}"
 SITE_URL="${site_url}"
 
 # 去掉 DB_HOST 本身已经带的 :port（如果有）
-DB_HOST="${DB_HOST_RAW%%:*}"
+DB_HOST=$(echo "$DB_HOST_RAW" | cut -d ':' -f 1)
 
 echo "DB_HOST_RAW=$DB_HOST_RAW" >> /var/log/cloud-init-output.log
 echo "DB_HOST=$DB_HOST  DB_PORT=$DB_PORT  IS_PRIMARY=$IS_PRIMARY" >> /var/log/cloud-init-output.log
@@ -111,11 +111,12 @@ try {
     die('Error loading database credentials. Please contact administrator.');
 }
 
-/** 数据库设置 */
-define( 'DB_NAME', '${DB_NAME}' );            // 来自 user_data（Terraform 注入）
-define( 'DB_USER', \$dbUser );                // 来自 Secrets Manager
-define( 'DB_PASSWORD', \$dbPass );            // 来自 Secrets Manager
-define( 'DB_HOST', '${DB_HOST}:${DB_PORT}' ); // 来自 user_data（Terraform 注入）
+/** db settings */
+
+define( 'DB_NAME', '$DB_NAME' ); 
+define( 'DB_USER', \$dbUser );                // from Secrets Manager
+define( 'DB_PASSWORD', \$dbPass );            // from Secrets Manager
+define( 'DB_HOST', '$DB_HOST:$DB_PORT' );  
 define( 'DB_CHARSET', 'utf8mb4' );
 define( 'DB_COLLATE', '' );
 

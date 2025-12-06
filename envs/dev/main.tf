@@ -15,10 +15,12 @@ locals {
 
 module "hr_portal" {
   source = "../../modules/hr-portal"
+  providers = {
+    aws         = aws
+    aws.standby = aws.standby
+  }
 
   environment          = "dev"
-  region               = "us-west-1"
-  db_host              = module.rds.db_endpoint
   db_name              = "db_intelli_cloud"
   db_user              = local.db_creds.username
   db_password          = local.db_creds.password
