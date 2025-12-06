@@ -9,7 +9,7 @@
 #  logout_urls                          = ["http://${aws_lb.alb_primary.dns_name}/"]
 #  allowed_oauth_flows_user_pool_client = true
 #  allowed_oauth_flows                  = ["code"]
- # allowed_oauth_scopes                 = ["email", "openid", "profile"]
+# allowed_oauth_scopes                 = ["email", "openid", "profile"]
 #  supported_identity_providers         = ["COGNITO"]
 #  generate_secret     = true
 #}
