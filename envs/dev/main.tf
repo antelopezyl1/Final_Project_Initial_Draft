@@ -16,12 +16,12 @@ locals {
 module "hr_portal" {
   source = "../../modules/hr-portal"
 
-  environment           = "dev"
-  region                = "us-west-1"
-  db_host               = module.rds.db_endpoint
-  db_name               = "db_intelli_cloud"
-  db_user               = local.db_creds.username
-  db_password           = local.db_creds.password
+  environment          = "dev"
+  region               = "us-west-1"
+  db_host              = module.rds.db_endpoint
+  db_name              = "db_intelli_cloud"
+  db_user              = local.db_creds.username
+  db_password          = local.db_creds.password
   iam_instance_profile = "hr-portal-app-instance-profile"
 
 }
