@@ -11,7 +11,7 @@ variable "db_user" {
     type = string 
     }
 variable "db_password" { 
-    type = string, 
+    type = string
     sensitive = true 
     }
 variable "iam_instance_profile" { 
