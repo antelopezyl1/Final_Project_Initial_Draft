@@ -11,16 +11,6 @@ provider "aws" {
   region = "us-west-1"
 }
 
-variable "db_username" {
-  type = string
-}
-
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-
-
 resource "aws_secretsmanager_secret" "hr_portal_db" {
   name        = "hr-portal-db-credentials"
   description = "Shared DB credentials for HR-Portal (dev & prod)"
