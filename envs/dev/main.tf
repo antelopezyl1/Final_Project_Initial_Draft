@@ -22,6 +22,6 @@ module "hr_portal" {
   db_name               = "db_intelli_cloud"
   db_user               = local.db_creds.username
   db_password           = local.db_creds.password
-  instance_profile_name = "hr-portal-app-instance-profile"
+  iam_instance_profile = "hr-portal-app-instance-profile"
 
 }
