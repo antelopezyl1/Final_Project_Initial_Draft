@@ -115,21 +115,21 @@ resource "tls_private_key" "key_primary" {
 }
 
 resource "aws_key_pair" "key_pair_primary" {
-  key_name   = "key_primary"
+  key_name   = "key_primary_cloud"
   public_key = tls_private_key.key_primary.public_key_openssh
 
   provisioner "local-exec" {
-    command = "echo '${tls_private_key.key_primary.private_key_pem}' > ${path.module}/key_primary.pem && chmod 0700 ${path.module}/key_primary.pem"
+    command = "echo '${tls_private_key.key_primary.private_key_pem}' > ${path.module}/key_primary_cloud.pem && chmod 0700 ${path.module}/key_primary_cloud.pem"
   }
 }
 
 resource "aws_key_pair" "key_pair_standby" {
   provider   = aws.standby
-  key_name   = "key_standby"
+  key_name   = "key_standby_cloud"
   public_key = tls_private_key.key_primary.public_key_openssh
 
   provisioner "local-exec" {
-    command = "echo '${tls_private_key.key_primary.private_key_pem}' > ${path.module}/key_standby.pem && chmod 0700 ${path.module}/key_standby.pem"
+    command = "echo '${tls_private_key.key_primary.private_key_pem}' > ${path.module}/key_standby_cloud.pem && chmod 0700 ${path.module}/key_standby_cloud.pem"
   }
 }
 
@@ -142,7 +142,7 @@ resource "aws_launch_template" "primary_launch" {
   vpc_security_group_ids = [aws_security_group.allow_egress_primary.id,
     aws_security_group.ec2_primary.id,
   aws_security_group.allow_ssh_primary.id]
-  key_name = "key_primary"
+  key_name = "key_primary_cloud"
   iam_instance_profile {
     name = var.iam_instance_profile
   }
@@ -191,7 +191,7 @@ resource "aws_launch_template" "standby_launch" {
   vpc_security_group_ids = [aws_security_group.allow_egress_standby.id,
     aws_security_group.ec2_standby.id,
   aws_security_group.allow_ssh_standby.id]
-  key_name = "key_standby"
+  key_name = "key_standby_cloud"
 
   iam_instance_profile {
     name = var.iam_instance_profile
