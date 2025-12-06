@@ -40,7 +40,7 @@ resource "aws_vpc_security_group_ingress_rule" "db_from_ec2_standby" {
 module "db_primary" {
   source = "terraform-aws-modules/rds/aws"
 
-  identifier = "rds-primary"
+  identifier = "rds-primary-cloud"
 
   engine               = "mysql"
   engine_version       = "8.0"
