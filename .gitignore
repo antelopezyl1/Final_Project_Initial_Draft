@@ -1,2 +1,18 @@
 # Ignore tfvars with secrets
 global/secrets.auto.tfvars
+
+.terraform/
+**/.terraform/
+
+
+terraform.tfstate
+terraform.tfstate.*
+**/terraform.tfstate
+**/terraform.tfstate.*
+
+
+.terraform.lock.hcl
+**/.terraform.lock.hcl
+
+*.pem
+.DS_Store

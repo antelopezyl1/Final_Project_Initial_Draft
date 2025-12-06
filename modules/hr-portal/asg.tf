@@ -142,8 +142,10 @@ resource "aws_launch_template" "primary_launch" {
   vpc_security_group_ids = [aws_security_group.allow_egress_primary.id,
     aws_security_group.ec2_primary.id,
   aws_security_group.allow_ssh_primary.id]
-  key_name             = "key_primary"
-  iam_instance_profile = var.instance_profile_name
+  key_name = "key_primary"
+  iam_instance_profile {
+    name = var.iam_instance_profile
+  }
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
     is_primary  = true
@@ -190,6 +192,10 @@ resource "aws_launch_template" "standby_launch" {
     aws_security_group.ec2_standby.id,
   aws_security_group.allow_ssh_standby.id]
   key_name = "key_standby"
+
+  iam_instance_profile {
+    name = var.iam_instance_profile
+  }
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
     is_primary  = false
