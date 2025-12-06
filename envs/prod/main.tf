@@ -1,16 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-west-1"
-}
-
 
 data "aws_secretsmanager_secret" "hr_portal_db" {
   name = "hr-portal-db-credentials"
