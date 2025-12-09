@@ -1,103 +1,103 @@
-name: Terraform CI/CD
+# name: Terraform CI/CD
 
-on:
-  # 1) feature -> dev PR：only plan，no apply
-  pull_request:
-    branches: [ "dev" ]
+# on:
+#   # 1) feature -> dev PR：only plan，no apply
+#   pull_request:
+#     branches: [ "dev" ]
 
-  # 2) dev -> main(prod) merge：push to main, and apply
-  push:
-    branches: [ "main" ]
+#   # 2) dev -> main(prod) merge：push to main, and apply
+#   push:
+#     branches: [ "main" ]
 
-env:
-  AWS_REGION: us-west-1  
+# env:
+#   AWS_REGION: us-west-1  
 
-jobs:
-  # === plan stage：PR to dev ，run plan of global + envs/dev ===
-  plan:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+# jobs:
+#   # === plan stage：PR to dev ，run plan of global + envs/dev ===
+#   plan:
+#     if: github.event_name == 'pull_request'
+#     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        workdir:
-          - global
-          - envs/dev
+#     strategy:
+#       matrix:
+#         workdir:
+#           - global
+#           - envs/dev
 
-    defaults:
-      run:
-        working-directory: ${{ matrix.workdir }}
+#     defaults:
+#       run:
+#         working-directory: ${{ matrix.workdir }}
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v4
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: 1.7.5
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform Init
-        run: terraform init -input=false
+#       - name: Terraform Init
+#         run: terraform init -input=false
 
-      - name: Terraform Fmt
-        run: terraform fmt -check
+#       - name: Terraform Fmt
+#         run: terraform fmt -check
 
-      - name: Terraform Validate
-        run: terraform validate
+#       - name: Terraform Validate
+#         run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan -input=false -no-color
+#       - name: Terraform Plan
+#         run: terraform plan -input=false -no-color
 
-  # === deploy：push to main(prod)，run apply of global + envs/prod ===
-  apply:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+#   # === deploy：push to main(prod)，run apply of global + envs/prod ===
+#   apply:
+#     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+#     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        workdir:
-          - global
-          - envs/prod
+#     strategy:
+#       matrix:
+#         workdir:
+#           - global
+#           - envs/prod
 
-    defaults:
-      run:
-        working-directory: ${{ matrix.workdir }}
+#     defaults:
+#       run:
+#         working-directory: ${{ matrix.workdir }}
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v4
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.5
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: 1.7.5
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-1
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: us-west-1
 
-      - name: Terraform Init
-        run: terraform init -input=false
+#       - name: Terraform Init
+#         run: terraform init -input=false
 
-      - name: Terraform Fmt
-        run: terraform fmt -check
+#       - name: Terraform Fmt
+#         run: terraform fmt -check
 
-      - name: Terraform Validate
-        run: terraform validate
+#       - name: Terraform Validate
+#         run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan -input=false -no-color
+#       - name: Terraform Plan
+#         run: terraform plan -input=false -no-color
 
-      - name: Terraform Apply
-        run: terraform apply -input=false -auto-approve
+#       - name: Terraform Apply
+#         run: terraform apply -input=false -auto-approve
