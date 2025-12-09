@@ -1,6 +1,6 @@
 
 data "aws_secretsmanager_secret" "hr_portal_db" {
-  name = "hr-portal-db-credentials"
+  name = "hr-portal-db-credentials-v2"
 }
 
 data "aws_secretsmanager_secret_version" "hr_portal_db" {
@@ -22,7 +22,7 @@ module "hr_portal" {
 
   environment          = "prod"
   db_name              = "db_intelli_cloud"
-  db_user              = local.db_creds.username
-  db_password          = local.db_creds.password
+  db_user              = local.db_creds.db_username
+  db_password          = local.db_creds.db_password
   iam_instance_profile = "hr-portal-app-instance-profile"
 }

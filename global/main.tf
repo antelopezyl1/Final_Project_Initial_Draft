@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_secretsmanager_secret" "hr_portal_db" {
-  name        = "hr-portal-db-credentials"
+  name        = "hr-portal-db-credentials-v2"
   description = "Shared DB credentials for HR-Portal (dev & prod)"
 }
 

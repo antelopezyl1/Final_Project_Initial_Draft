@@ -43,7 +43,7 @@ module "db_primary" {
   identifier = "rds-primary-cloud"
 
   engine               = "mysql"
-  engine_version       = "8.0"
+  engine_version       = "8.0.43"
   major_engine_version = "8.0"
   instance_class       = "db.t4g.micro"
   allocated_storage    = 20
@@ -69,7 +69,7 @@ module "db_primary" {
   family = "mysql8.0"
 
   storage_encrypted = true
-  kms_key_id        = data.aws_kms_alias.rds_kms_primary.arn
+  kms_key_id        = "arn:aws:kms:us-west-1:285795751798:key/ed8061d5-c79a-48c8-9454-b142d80e8709"
 
 }
 
@@ -89,7 +89,7 @@ module "replica_mysql_primary" {
   replicate_source_db = module.db_primary.db_instance_arn
 
   engine               = "mysql"
-  engine_version       = "8.0"
+  engine_version       = "8.0.43"
   major_engine_version = "8.0"
   instance_class       = "db.t4g.micro"
 
@@ -101,7 +101,7 @@ module "replica_mysql_primary" {
   subnet_ids             = module.vpc_primary.database_subnets
 
   storage_encrypted = true
-  kms_key_id        = data.aws_kms_alias.rds_kms_primary.arn
+  kms_key_id        = "arn:aws:kms:us-west-1:285795751798:key/ed8061d5-c79a-48c8-9454-b142d80e8709"
 
   family              = "mysql8.0"
   skip_final_snapshot = true
@@ -130,7 +130,7 @@ module "replica_mysql_standby" {
   replicate_source_db = module.db_primary.db_instance_arn #read replica in standby region
 
   engine               = "mysql"
-  engine_version       = "8.0"
+  engine_version       = "8.0.43"
   major_engine_version = "8.0"
   instance_class       = "db.t4g.micro"
 
@@ -142,7 +142,7 @@ module "replica_mysql_standby" {
   subnet_ids             = module.vpc_standby.database_subnets
 
   storage_encrypted = true
-  kms_key_id        = data.aws_kms_alias.rds_kms_standby.arn
+  kms_key_id        = "arn:aws:kms:us-west-2:285795751798:key/cd6f2da1-9e03-4f07-92b5-8c4c78fff0de"
 
   # DB parameter group
   family = "mysql8.0"
