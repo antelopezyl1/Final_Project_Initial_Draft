@@ -3,43 +3,48 @@ set -euxo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update -y
-apt-get install -y jq awscli
+apt-get install -y jq unzip
+
+# install AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip /tmp/awscliv2.zip -d /tmp
+/tmp/aws/install -i /usr/local/aws-cli -b /usr/local/bin
+
+apt-get install -y apache2 mysql-client php libapache2-mod-php php-mysql php-xml php-gd php-mbstring php-curl php-zip unzip curl wget ca-certificates
+
 
 IS_PRIMARY="${is_primary}"
 
-# 从 Secrets Manager 读取 DB 用户和密码（用于 mysql 建库）
+# read DB username and pass from Secrets Manager 
 SECRET_JSON=$(aws secretsmanager get-secret-value \
   --region us-west-1 \
-  --secret-id "hr-portal-db-credentials" \
+  --secret-id "hr-portal-db-credentials-v2" \
   --query SecretString \
   --output text)
 
 DB_USER=$(echo "$SECRET_JSON" | jq -r .username)
 DB_PASSWORD=$(echo "$SECRET_JSON" | jq -r .password)
 
-# 这些变量由 Terraform 的 templatefile 注入
+# These parameters are injected by templatefile of Terraform 
 DB_HOST_RAW="${db_host}"
 DB_PORT="${db_port}"
 DB_NAME="${db_name}"
 SITE_URL="${site_url}"
 
-# 去掉 DB_HOST 本身已经带的 :port（如果有）
+# remove :port from DB_HOST 
 DB_HOST=$(echo "$DB_HOST_RAW" | cut -d ':' -f 1)
 
 echo "DB_HOST_RAW=$DB_HOST_RAW" >> /var/log/cloud-init-output.log
 echo "DB_HOST=$DB_HOST  DB_PORT=$DB_PORT  IS_PRIMARY=$IS_PRIMARY" >> /var/log/cloud-init-output.log
 
-apt-get update -y
-apt-get install -y apache2 mysql-client php libapache2-mod-php php-mysql php-xml php-gd php-mbstring php-curl php-zip unzip curl wget ca-certificates
-
-# Apache 基本配置
+# Apache config
 a2enmod rewrite
 sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 systemctl enable --now apache2
 
-# ---- 只在 primary 节点创建 DB ----
+# ---- create db only in primary ----
 if [ "$IS_PRIMARY" = "true" ]; then
-  # 等 RDS ready
+  # wait RDS ready
   for i in {1..24}; do
     if timeout 2 bash -c "echo > /dev/tcp/$DB_HOST/$DB_PORT" 2>/dev/null; then
       break
@@ -47,21 +52,21 @@ if [ "$IS_PRIMARY" = "true" ]; then
     sleep 5
   done
 
-  # 创建数据库
+  # create db if not exist
   mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASSWORD" \
     -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" \
     || echo "[WARN] create database failed, continue..."
 fi
 # ---- /only primary ----
 
-# 安装 WordPress
+# install WordPress
 cd /var/www/html
 rm -rf ./*
 curl -L -o wp.tar.gz https://wordpress.org/latest.tar.gz
 tar -xzf wp.tar.gz --strip-components=1
 rm -f wp.tar.gz
 
-# 安装 Composer 和 AWS SDK for PHP（给 wp-config.php 用）
+# install Composer and AWS SDK for PHP（for wp-config.php）
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 php -r "unlink('composer-setup.php');"
@@ -69,7 +74,7 @@ php -r "unlink('composer-setup.php');"
 cd /var/www/html
 composer require aws/aws-sdk-php
 
-# 写入带 Secrets Manager 集成的 wp-config.php
+# write wp-config.php with Secrets Manager
 cat > wp-config.php <<PHP
 <?php
 /**
@@ -120,13 +125,13 @@ define( 'DB_HOST', '$DB_HOST:$DB_PORT' );
 define( 'DB_CHARSET', 'utf8mb4' );
 define( 'DB_COLLATE', '' );
 
-/** 数据表前缀 */
+/** prefix of tables */
 \$table_prefix = 'wp_';
 
-/** 调试模式 */
+/** debug mode */
 define( 'WP_DEBUG', false );
 
-/** 设置绝对路径并加载 WordPress 核心文件 */
+/** set abs path and load WordPress files */
 if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/' );
 }
@@ -134,7 +139,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require ABSPATH . 'wp-settings.php';
 PHP
 
-# 自动插入随机 SALT
+# sed random SALT
 sed -i "/AUTH_KEY/d;/SECURE_AUTH_KEY/d;/LOGGED_IN_KEY/d;/NONCE_KEY/d;/AUTH_SALT/d;/SECURE_AUTH_SALT/d;/LOGGED_IN_SALT/d;/NONCE_SALT/d" wp-config.php
 curl -s https://api.wordpress.org/secret-key/1.1/salt/ > /tmp/wp-salts
 awk '1;/\$table_prefix/{system("cat /tmp/wp-salts")}' wp-config.php > wp-config.php.new && mv wp-config.php.new wp-config.php
