@@ -2,7 +2,7 @@
 module "vpc_primary" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "my-vpc-primary"
+  name = "my-vpc-primary-cloud"
   cidr = "172.16.0.0/16"
 
 
@@ -25,7 +25,7 @@ module "vpc_standby" {
     aws = aws.standby
   }
 
-  name = "my-vpc-standby"
+  name = "my-vpc-standby-cloud"
   cidr = "10.16.0.0/16"
 
 
