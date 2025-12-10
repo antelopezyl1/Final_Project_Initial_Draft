@@ -3,7 +3,7 @@ name: Terraform CI (safe / no apply)
 on:
   # 1) PR: feature -> dev：run Terraform check
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "develop" ]
 
   # 2) merge dev -> main：run check when from dev push to main
   push:
